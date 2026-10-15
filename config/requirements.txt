@@ -1,0 +1,5 @@
+google-cloud-storage>=3.0,<4
+google-crc32c>=1.6,<2
+netCDF4>=1.7,<2
+numpy>=2.0,<3
+PyYAML>=6.0,<7

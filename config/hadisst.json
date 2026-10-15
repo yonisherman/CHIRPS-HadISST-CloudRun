@@ -1,0 +1,18 @@
+[
+  {
+    "dataset_id": "erdHadISST",
+    "source": "https://www.metoffice.gov.uk/hadobs/hadisst/data/HadISST_sst.nc.gz",
+    "filename": "HadISST_sst.nc",
+    "prefix": "Hadley/",
+    "variable": "sst",
+    "gzip": true
+  },
+  {
+    "dataset_id": "erdHadISSTIce",
+    "source": "https://www.metoffice.gov.uk/hadobs/hadisst/data/HadISST_ice.nc.gz",
+    "filename": "HadISST_ice.nc",
+    "prefix": "Hadley/",
+    "variable": "sic",
+    "gzip": true
+  }
+]

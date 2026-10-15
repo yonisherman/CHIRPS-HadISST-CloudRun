@@ -1,0 +1,34 @@
+[
+  {
+    "dataset_id": "chirps20GlobalDailyP05",
+    "source": "https://data.chc.ucsb.edu/products/CHIRPS-2.0/global_daily/netcdf/p05/",
+    "regex": "chirps-v2\\.0\\.\\d{4}\\.days_p05\\.nc",
+    "prefix": "points/chirps20/globalDailyP05/",
+    "variable": "precip",
+    "gzip": false
+  },
+  {
+    "dataset_id": "chirps20GlobalPentadP05",
+    "source": "https://data.chc.ucsb.edu/products/CHIRPS-2.0/global_pentad/netcdf/",
+    "regex": "chirps-v2\\.0\\.\\d{4}\\.pentads\\.nc",
+    "prefix": "points/chirps20/globalPentadP05/",
+    "variable": "precip",
+    "gzip": false
+  },
+  {
+    "dataset_id": "chirps20GlobalMonthlyP05",
+    "source": "https://data.chc.ucsb.edu/products/CHIRPS-2.0/global_monthly/netcdf/",
+    "regex": "chirps-v2\\.0\\.monthly\\.nc",
+    "prefix": "points/chirps20/globalMonthlyP05/",
+    "variable": "precip",
+    "gzip": false
+  },
+  {
+    "dataset_id": "chirps20GlobalAnnualP05",
+    "source": "https://data.chc.ucsb.edu/products/CHIRPS-2.0/global_annual/netcdf/",
+    "regex": "chirps-v2\\.0\\.annual\\.nc",
+    "prefix": "points/chirps20/globalAnnualP05/",
+    "variable": "precip",
+    "gzip": false
+  }
+]

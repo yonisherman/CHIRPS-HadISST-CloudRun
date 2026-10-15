@@ -1,0 +1,11 @@
+# Cloud Run execution selects one suite; these defaults mirror the project.
+output_bucket: erddap-swfsc-erd
+suites:
+  chirps:
+    products: /app/config/chirps.json
+    schedule: "0 8 * * 2"
+    timezone: America/Los_Angeles
+  hadisst:
+    products: /app/config/hadisst.json
+    schedule: "0 9 * * 2"
+    timezone: America/Los_Angeles
