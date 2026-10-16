@@ -14,6 +14,7 @@ SERVICE_ACCOUNT="${SERVICE_ACCOUNT:-swfscerddap-run-sa1@${PROJECT_ID}.iam.gservi
 PLATFORM="${PLATFORM:-linux/amd64}"
 IMAGE_PATH="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO_NAME}/${IMAGE_NAME}:${TAG}"
 OUTPUT_BUCKET="${OUTPUT_BUCKET:-erddap-swfsc-erd}"
+STATE_PREFIX="${STATE_PREFIX:-operations/workflow-state/source-downloads}"
 ERDDAP_BASE_URL="${ERDDAP_BASE_URL:-https://155.206.244.135/erddap}"
 # Temporary IP endpoint compatibility, matching the existing project jobs.
 ERDDAP_VERIFY_TLS="${ERDDAP_VERIFY_TLS:-false}"
@@ -46,7 +47,7 @@ fi
 gcloud run jobs deploy "$JOB_NAME" --project "$PROJECT_ID" --region "$REGION" \
  --image "$IMAGE_PATH" --service-account "$SERVICE_ACCOUNT" --tasks 1 --parallelism 1 \
  --max-retries 0 --task-timeout "$JOB_TIMEOUT" --memory "$MEMORY" --cpu "$CPU" \
- --set-env-vars "JOB_MODE=${SUITE},OUTPUT_BUCKET=${OUTPUT_BUCKET},ERDDAP_BASE_URL=${ERDDAP_BASE_URL},ERDDAP_VERIFY_TLS=${ERDDAP_VERIFY_TLS},ERDDAP_FLAG_SECRET=projects/${PROJECT_ID}/locations/${REGION}/secrets/${FLAG_SECRET}/versions/latest,MAX_LOCAL_BYTES=${MAX_LOCAL_BYTES}"
+ --set-env-vars "JOB_MODE=${SUITE},OUTPUT_BUCKET=${OUTPUT_BUCKET},STATE_PREFIX=${STATE_PREFIX},ERDDAP_BASE_URL=${ERDDAP_BASE_URL},ERDDAP_VERIFY_TLS=${ERDDAP_VERIFY_TLS},ERDDAP_FLAG_SECRET=projects/${PROJECT_ID}/locations/${REGION}/secrets/${FLAG_SECRET}/versions/latest,MAX_LOCAL_BYTES=${MAX_LOCAL_BYTES}"
 gcloud run jobs add-iam-policy-binding "$JOB_NAME" --project "$PROJECT_ID" --region "$REGION" \
  --member "serviceAccount:${SERVICE_ACCOUNT}" --role roles/run.invoker >/dev/null
 PROJECT_NUMBER="$(gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')"

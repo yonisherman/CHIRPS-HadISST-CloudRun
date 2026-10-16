@@ -42,7 +42,7 @@ CHIRPS uses 4 CPUs / 16 GiB, because the combined monthly file is approximately 
 
 Downloads must be nonempty, complete relative to Content-Length when supplied, and open successfully as NetCDF. Time, latitude, longitude and the expected data variable must exist. Coordinate axes must be finite and monotonic. A known source time-coverage regression is rejected once a baseline has been established. Content hashes are calculated while streaming from disk. GCS uploads/metadata changes use generation preconditions. A per-suite GCS lock prevents overlapping writers; an abandoned lock expires after 25 hours, longer than the longest deployed task timeout.
 
-Reload intent is stored under `_workflow_state/source-downloads/` before each changed upload. If flagging fails, the execution fails and the next run retries the flag even if no additional files changed. ERDDAP flags are sent after each product's attempted processing; if one product partially succeeds, its published changes can still be reloaded while the overall job reports failure. A successful flag acknowledges a reload request; it does not prove served coverage.
+Reload intent and per-suite locks are stored under `operations/workflow-state/source-downloads/` before each changed upload. If flagging fails, the execution fails and the next run retries the flag even if no additional files changed. ERDDAP flags are sent after each product's attempted processing; if one product partially succeeds, its published changes can still be reloaded while the overall job reports failure. A successful flag acknowledges a reload request; it does not prove served coverage.
 
 ## Local source plan and tests
 
@@ -74,7 +74,21 @@ Defaults:
 - Image: `source-downloads:v0.1.0`
 - Temporary ERDDAP endpoint: `https://155.206.244.135/erddap`, TLS verification disabled to match the existing IP-endpoint setup. Override `ERDDAP_BASE_URL` and `ERDDAP_VERIFY_TLS=true` once a trusted hostname is ready.
 
-The runtime account needs object read/write permissions on the output bucket (including `_workflow_state/`). The existing project service account is reused; the script does not silently grant new bucket/project-wide permissions. It needs `roles/run.invoker` for Scheduler invocation and accessor access to the corresponding **regional** flag secret. The deploying user needs the existing Artifact Registry, Cloud Run, Scheduler, service-account-use and regional Secret Manager permissions.
+The runtime account needs object read/write permissions on the output bucket (including `operations/workflow-state/`). The existing project service account is reused; the script does not silently grant new bucket/project-wide permissions. It needs `roles/run.invoker` for Scheduler invocation and accessor access to the corresponding **regional** flag secret. The deploying user needs the existing Artifact Registry, Cloud Run, Scheduler, service-account-use and regional Secret Manager permissions.
+
+Before deploying a version that changes `STATE_PREFIX`, pause each suite's scheduler and wait for any running execution to finish. Copy its existing state to the new path, then deploy and run a verification execution. Keep the old prefix until the new run succeeds:
+
+```bash
+for suite in chirps hadisst; do
+  gcloud scheduler jobs pause "${suite}-weekly-schedule" \
+    --project=ggn-nmfs-swfscerddap-dev-1 --location=us-east4
+  gcloud storage rsync --recursive \
+    "gs://erddap-swfsc-erd/_workflow_state/source-downloads/${suite}/" \
+    "gs://erddap-swfsc-erd/operations/workflow-state/source-downloads/${suite}/"
+done
+```
+
+The deployment script leaves an existing paused schedule paused. Resume each schedule after verifying a successful run.
 
 Create the two regional flag secrets using your current valid per-dataset ERDDAP flag keys. The helper prompts without echoing keys and passes JSON directly to gcloud; it stores no local key file. It does not generate or change ERDDAP keys.
 

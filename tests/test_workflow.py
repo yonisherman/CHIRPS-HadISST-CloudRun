@@ -36,6 +36,7 @@ class Blob:
 
 class FakeStore:
     def __init__(self):self.objects={};self.states={};self.bucket=self
+    def state_path(self,suite,name):return f'operations/workflow-state/source-downloads/{suite}/{name}'
     def get(self,name):return self.objects.get(name)
     def blob(self,name):
         if name not in self.objects:self.objects[name]=Blob(name)
@@ -108,6 +109,7 @@ class WorkflowTests(unittest.TestCase):
                     self.assertTrue(next(iter(store.states.values()))['pending_flag'])
                     flag.side_effect=None
                 else:d.run(args)
+                self.assertIn('operations/workflow-state/source-downloads/chirps/test.json', store.states)
                 self.assertEqual(get.call_count,1)
                 d.run(args)
                 self.assertEqual(get.call_count,1) # Fingerprint prevents a second download.

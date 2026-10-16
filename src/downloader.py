@@ -183,9 +183,16 @@ def digests(path):
 
 
 class Store:
-    def __init__(self, bucket):
+    def __init__(self, bucket, state_prefix=None):
         from google.cloud import storage
         self.bucket = storage.Client().bucket(bucket)
+        self.state_prefix = (state_prefix or os.getenv(
+            'STATE_PREFIX', 'operations/workflow-state/source-downloads')).strip('/')
+        if not self.state_prefix or any(part.startswith('_') for part in self.state_prefix.split('/')):
+            raise ValueError('STATE_PREFIX must use a non-underscore bucket path')
+
+    def state_path(self, suite, name):
+        return f'{self.state_prefix}/{suite}/{name}'
 
     def get(self, name):
         return self.bucket.get_blob(name)
@@ -204,7 +211,7 @@ class Store:
     @contextlib.contextmanager
     def lock(self, suite):
         from google.api_core.exceptions import PreconditionFailed
-        name = '_workflow_state/source-downloads/' + suite + '/lock.json'
+        name = self.state_path(suite, 'lock.json')
         old = self.get(name)
         if old and old.updated > datetime.now(timezone.utc) - timedelta(hours=25):
             raise RuntimeError('Another execution holds the suite lock; retry after it finishes')
@@ -301,7 +308,7 @@ def run(args):
     with store.lock(args.suite):
         for p in products:
             id = p['dataset_id']
-            pending_path = f'_workflow_state/source-downloads/{args.suite}/{id}.json'
+            pending_path = store.state_path(args.suite, f'{id}.json')
             try:
                 for url, name in discover(p):
                     target = p['prefix'] + name
